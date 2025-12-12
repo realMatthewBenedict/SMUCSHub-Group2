@@ -151,30 +151,30 @@
         var cutoff = new Date(now.getTime() + this.rangeDays * 86400000);
         var q = this.textSearch.trim().toLowerCase();
 
-        return this.interviews
-          .filter(function(iv) {
-            if (!self.passesStatusFilter(iv, now, cutoff)) return false;
-            var posting = self.postingDisplay(iv);
-            if (self.postingFilter && posting !== self.postingFilter) return false;
-            if (q) {
-              var jobTitle = (iv.postingTitle || "").toLowerCase();
-              var interviewers = self.interviewerDisplay(iv).toLowerCase();
-              var hay = (jobTitle + " " + interviewers).trim();
-              if (hay.indexOf(q) === -1) return false;
-            }
-            return true;
-          })
-          .sort(function(a, b) {
-            var da = self.getStartDate(a);
-            var db = self.getStartDate(b);
-            if (self.sortBy === "status") {
-              var ra = self.statusRank(a.status);
-              var rb = self.statusRank(b.status);
-              if (ra !== rb) return ra - rb;
-              return da - db;
-            }
+        var filtered = this.interviews.filter(function(iv) {
+          if (!self.passesStatusFilter(iv, now, cutoff)) return false;
+          var posting = self.postingDisplay(iv);
+          if (self.postingFilter && posting !== self.postingFilter) return false;
+          if (q) {
+            var jobTitle = (iv.postingTitle || "").toLowerCase();
+            var interviewers = self.interviewerDisplay(iv).toLowerCase();
+            var hay = (jobTitle + " " + interviewers).trim();
+            if (hay.indexOf(q) === -1) return false;
+          }
+          return true;
+        });
+
+        return filtered.sort(function(a, b) {
+          var da = self.getStartDate(a);
+          var db = self.getStartDate(b);
+          if (self.sortBy === "status") {
+            var ra = self.statusRank(a.status);
+            var rb = self.statusRank(b.status);
+            if (ra !== rb) return ra - rb;
             return da - db;
-          });
+          }
+          return da - db;
+        });
       }
 
       setFilter(type, value) {
@@ -190,16 +190,23 @@
       render() {
         var self = this;
         var results = this.filterInterviews();
-        if (this.statusFilter === "upcoming" && this.maxItems) {
-          results = results.slice(0, this.maxItems);
-        }
-
+        
         var postingsSet = {};
-        this.interviews.forEach(function(iv) {
+        var filtered = this.interviews.filter(function(iv) {
+          var now = new Date();
+          var cutoff = new Date(now.getTime() + self.rangeDays * 86400000);
+          return self.passesStatusFilter(iv, now, cutoff);
+        });
+        
+        filtered.forEach(function(iv) {
           var p = self.postingDisplay(iv);
           if (p && p !== "-") postingsSet[p] = true;
         });
         var postings = Object.keys(postingsSet).sort();
+        
+        if (this.statusFilter === "upcoming" && this.maxItems) {
+          results = results.slice(0, this.maxItems);
+        }
 
         var html = '<div class="interviews-box"><h2 class="title">Interviews</h2><div class="filters">';
         html += '<select id="filter-status"><option value="upcoming">Upcoming</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option><option value="all">All</option></select>';
@@ -326,6 +333,126 @@
         timezone: "EST",
         interviewers: [{name: "Alice Johnson"}],
         metadata: {notes: "Behavioral interview completed"}
+      },
+      {
+        interviewId: "3",
+        postingTitle: "Frontend Developer",
+        startTime: new Date(Date.now() + 1 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 1 * 86400000 + 3600000).toISOString(),
+        status: "scheduled",
+        role: "Frontend Developer",
+        location: "https://meet.google.com/abc-defg-hij",
+        timezone: "EST",
+        interviewers: [{name: "Sarah Wilson"}],
+        metadata: {notes: "React and TypeScript coding challenge"}
+      },
+      {
+        interviewId: "4",
+        postingTitle: "Senior Software Engineer",
+        startTime: new Date(Date.now() + 5 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 5 * 86400000 + 3600000).toISOString(),
+        status: "scheduled",
+        role: "Full Stack Engineer",
+        location: "https://zoom.us/j/987654321",
+        timezone: "PST",
+        interviewers: [{name: "Michael Chen"}, {name: "Emily Rodriguez"}],
+        metadata: {notes: "Final round with engineering leadership"}
+      },
+      {
+        interviewId: "5",
+        postingTitle: "Data Scientist",
+        startTime: new Date(Date.now() + 3 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 3 * 86400000 + 5400000).toISOString(),
+        status: "scheduled",
+        role: "Data Scientist",
+        location: "Building 2, Room 301",
+        timezone: "CST",
+        interviewers: [{name: "Dr. James Patterson"}],
+        metadata: {notes: "Machine learning case study presentation"}
+      },
+      {
+        interviewId: "6",
+        postingTitle: "Product Manager",
+        startTime: new Date(Date.now() + 8 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 8 * 86400000 + 3600000).toISOString(),
+        status: "scheduled",
+        role: "Senior Product Manager",
+        location: "https://teams.microsoft.com/l/meetup",
+        timezone: "EST",
+        interviewers: [{name: "Lisa Anderson"}, {name: "Tom Bradley"}],
+        metadata: {notes: "Product strategy discussion"}
+      },
+      {
+        interviewId: "7",
+        postingTitle: "Frontend Developer",
+        startTime: new Date(Date.now() + 10 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 10 * 86400000 + 3600000).toISOString(),
+        status: "scheduled",
+        role: "Senior Frontend Developer",
+        location: "https://zoom.us/j/555123456",
+        timezone: "PST",
+        interviewers: [{name: "Kevin Park"}],
+        metadata: {notes: "Architecture and design patterns discussion"}
+      },
+      {
+        interviewId: "8",
+        postingTitle: "DevOps Engineer",
+        startTime: new Date(Date.now() + 4 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 4 * 86400000 + 3600000).toISOString(),
+        status: "scheduled",
+        role: "DevOps Engineer",
+        location: "https://zoom.us/j/111222333",
+        timezone: "MST",
+        interviewers: [{name: "Rachel Green"}, {name: "David Lee"}],
+        metadata: {notes: "Infrastructure and CI/CD pipeline review"}
+      },
+      {
+        interviewId: "9",
+        postingTitle: "Senior Software Engineer",
+        startTime: new Date(Date.now() - 2 * 86400000).toISOString(),
+        endTime: new Date(Date.now() - 2 * 86400000 + 3600000).toISOString(),
+        status: "cancelled",
+        role: "Backend Engineer",
+        location: "https://zoom.us/j/cancelled123",
+        timezone: "PST",
+        interviewers: [{name: "Chris Martinez"}],
+        metadata: {notes: "Cancelled due to candidate scheduling conflict"}
+      },
+      {
+        interviewId: "10",
+        postingTitle: "Data Scientist",
+        startTime: new Date(Date.now() - 10 * 86400000).toISOString(),
+        endTime: new Date(Date.now() - 10 * 86400000 + 3600000).toISOString(),
+        status: "completed",
+        role: "Junior Data Scientist",
+        location: "Conference Room B",
+        timezone: "EST",
+        interviewers: [{name: "Angela Thompson"}],
+        metadata: {notes: "Initial screening completed successfully"}
+      },
+      {
+        interviewId: "11",
+        postingTitle: "UI/UX Designer",
+        startTime: new Date(Date.now() + 6 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 6 * 86400000 + 3600000).toISOString(),
+        status: "scheduled",
+        role: "Senior UX Designer",
+        location: "https://zoom.us/j/design123",
+        timezone: "PST",
+        interviewers: [{name: "Sophie Turner"}, {name: "Mark Johnson"}],
+        metadata: {notes: "Portfolio review and design critique"}
+      },
+      {
+        interviewId: "12",
+        postingTitle: "Frontend Developer",
+        startTime: new Date(Date.now() + 12 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 12 * 86400000 + 3600000).toISOString(),
+        status: "scheduled",
+        role: "Mid-level Frontend Developer",
+        location: "https://meet.google.com/xyz-test-789",
+        timezone: "EST",
+        interviewers: [{name: "Brian Foster"}],
+        metadata: {notes: "CSS and responsive design assessment"}
       }
     ];
 

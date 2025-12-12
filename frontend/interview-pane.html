@@ -1,271 +1,339 @@
-<script>
-class InterviewsPane {
-  constructor(container, options) {
-    this.container = container;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interviews Pane</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .interviews-box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .title {
+      margin-top: 0;
+    }
+    .filters {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .filters select, .filters input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .iv-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .iv-card {
+      border: 1px solid #e0e0e0;
+      padding: 15px;
+      border-radius: 6px;
+    }
+    .iv-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+    }
+    .iv-title {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 5px;
+    }
+    .iv-date {
+      color: #666;
+      font-size: 0.9em;
+    }
+    .iv-interviewer {
+      color: #444;
+      margin-top: 5px;
+    }
+    .toggle-btn {
+      padding: 6px 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .toggle-btn:hover {
+      background: #0056b3;
+    }
+    .iv-details {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .iv-details p {
+      margin: 8px 0;
+    }
+    .none {
+      color: #999;
+      text-align: center;
+      padding: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
 
-    // API DTO list (as returned by Interview API)
-    this.interviews = options.interviews || [];
+  <script>
+    class InterviewsPane {
+      constructor(container, options) {
+        this.container = container;
+        this.interviews = options.interviews || [];
+        this.rangeDays = options.defaultRangeDays || 14;
+        this.maxItems = options.maxItems !== undefined ? options.maxItems : 7;
+        this.statusFilter = "upcoming";
+        this.postingFilter = "";
+        this.textSearch = "";
+        this.sortBy = "date";
+        this.expandedId = null;
+        this.render();
+      }
 
-    this.rangeDays = options.defaultRangeDays || 14;
-    this.maxItems = options.maxItems ?? 7;
+      getStartDate(iv) {
+        return new Date(iv.startTime);
+      }
 
-    // UI filters
-    this.statusFilter = "upcoming"; // upcoming | completed | cancelled | all
-    this.postingFilter = "";        // postingTitle
-    this.textSearch = "";
+      interviewerDisplay(iv) {
+        var arr = Array.isArray(iv.interviewers) ? iv.interviewers : [];
+        if (arr.length === 0) return "-";
+        var names = arr.map(function(x) { return x && x.name; }).filter(Boolean);
+        return names.length > 0 ? names.join(", ") : "-";
+      }
 
-    this.sortBy = "date";
-    this.expandedId = null;
+      postingDisplay(iv) {
+        return iv.postingTitle || iv.postingId || "-";
+      }
 
-    this.render();
-  }
+      notesDisplay(iv) {
+        return (iv && iv.metadata && iv.metadata.notes) || "None";
+      }
 
-  // --- Helpers (API schema) ---
-  getStartDate(iv) {
-    // iv.startTime should be ISO-8601. If it includes an offset (recommended), Date parsing works.
-    return new Date(iv.startTime);
-  }
+      isUrl(s) {
+        return /^https?:\/\//i.test(String(s || ""));
+      }
 
-  interviewerDisplay(iv) {
-    const arr = Array.isArray(iv.interviewers) ? iv.interviewers : [];
-    if (arr.length === 0) return "—";
-    return arr.map(x => x?.name).filter(Boolean).join(", ") || "—";
-  }
-
-  postingDisplay(iv) {
-    // Prefer postingTitle for human display; fall back to postingId or "—"
-    return iv.postingTitle || iv.postingId || "—";
-  }
-
-  notesDisplay(iv) {
-    // API contract: metadata.notes
-    return iv?.metadata?.notes || "None";
-  }
-
-  isUrl(s) {
-    return /^https?:\/\//i.test(String(s || ""));
-  }
-
-  statusRank(status) {
-      switch (status) {
+      statusRank(status) {
+        switch (status) {
           case "scheduled": return 0;
           case "completed": return 1;
           case "cancelled": return 2;
           default: return 3;
+        }
       }
-  }
 
-  // Upcoming semantics:
-  // - status must be scheduled
-  // - startTime within [now, now + defaultRangeDays]
-  isUpcoming(iv, now, cutoff) {
-    const d = this.getStartDate(iv);
-    return iv.status === "scheduled" && d >= now && d <= cutoff;
-  }
+      isUpcoming(iv, now, cutoff) {
+        var d = this.getStartDate(iv);
+        return iv.status === "scheduled" && d >= now && d <= cutoff;
+      }
 
-  // Status filter mapping:
-  // UI "upcoming" => scheduled + within window
-  // UI "completed" => status === completed
-  // UI "cancelled" => status === cancelled
-  // UI "all" => no status constraints
-  passesStatusFilter(iv, now, cutoff) {
-    if (this.statusFilter === "all") return true;
-    if (this.statusFilter === "upcoming") return this.isUpcoming(iv, now, cutoff);
-    return iv.status === this.statusFilter; // completed/cancelled
-  }
+      passesStatusFilter(iv, now, cutoff) {
+        if (this.statusFilter === "all") return true;
+        if (this.statusFilter === "upcoming") return this.isUpcoming(iv, now, cutoff);
+        return iv.status === this.statusFilter;
+      }
 
-  filterInterviews() {
-    const now = new Date();
-    const cutoff = new Date(now.getTime() + this.rangeDays * 86400000);
+      filterInterviews() {
+        var self = this;
+        var now = new Date();
+        var cutoff = new Date(now.getTime() + this.rangeDays * 86400000);
+        var q = this.textSearch.trim().toLowerCase();
 
-    const q = this.textSearch.trim().toLowerCase();
-
-    return this.interviews
-      .filter(iv => {
-        // Status filter
-        if (!this.passesStatusFilter(iv, now, cutoff)) return false;
-
-        // Posting filter
-        const posting = this.postingDisplay(iv);
-        if (this.postingFilter && posting !== this.postingFilter) return false;
-
-        // Text search across posting title + interviewer names
-        if (q) {
-          const jobTitle = (iv.postingTitle || "").toLowerCase();
-          const interviewers = this.interviewerDisplay(iv).toLowerCase();
-          const hay = (jobTitle + " " + interviewers).trim();
-          if (!hay.includes(q)) return false;
-        }
-
-        return true;
-      })
-      .sort((a, b) => {
-        const da = this.getStartDate(a);
-        const db = this.getStartDate(b);
-
-        if (this.sortBy === "status") {
-            const ra = this.statusRank(a.status);
-            const rb = this.statusRank(b.status);
-            if (ra !== rb) return ra - rb;
+        return this.interviews
+          .filter(function(iv) {
+            if (!self.passesStatusFilter(iv, now, cutoff)) return false;
+            var posting = self.postingDisplay(iv);
+            if (self.postingFilter && posting !== self.postingFilter) return false;
+            if (q) {
+              var jobTitle = (iv.postingTitle || "").toLowerCase();
+              var interviewers = self.interviewerDisplay(iv).toLowerCase();
+              var hay = (jobTitle + " " + interviewers).trim();
+              if (hay.indexOf(q) === -1) return false;
+            }
+            return true;
+          })
+          .sort(function(a, b) {
+            var da = self.getStartDate(a);
+            var db = self.getStartDate(b);
+            if (self.sortBy === "status") {
+              var ra = self.statusRank(a.status);
+              var rb = self.statusRank(b.status);
+              if (ra !== rb) return ra - rb;
+              return da - db;
+            }
             return da - db;
+          });
+      }
+
+      setFilter(type, value) {
+        this[type] = value;
+        this.render();
+      }
+
+      toggleExpand(id) {
+        this.expandedId = this.expandedId === id ? null : id;
+        this.render();
+      }
+
+      render() {
+        var self = this;
+        var results = this.filterInterviews();
+        if (this.statusFilter === "upcoming" && this.maxItems) {
+          results = results.slice(0, this.maxItems);
         }
 
-        return da - db;
-      });
-}
+        var postingsSet = {};
+        this.interviews.forEach(function(iv) {
+          var p = self.postingDisplay(iv);
+          if (p && p !== "-") postingsSet[p] = true;
+        });
+        var postings = Object.keys(postingsSet).sort();
 
-  setFilter(type, value) {
-    this[type] = value;
-    this.render();
-  }
+        var html = '<div class="interviews-box"><h2 class="title">Interviews</h2><div class="filters">';
+        html += '<select id="filter-status"><option value="upcoming">Upcoming</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option><option value="all">All</option></select>';
+        
+        if (this.statusFilter === "upcoming") {
+          html += '<select id="filter-range"><option value="7">Next 7 days</option><option value="14">Next 14 days</option></select>';
+        }
+        
+        html += '<select id="filter-posting"><option value="">All Postings</option>';
+        postings.forEach(function(p) {
+          html += '<option value="' + self.escapeHtml(p) + '">' + self.escapeHtml(p) + '</option>';
+        });
+        html += '</select>';
+        
+        html += '<select id="sort-by"><option value="date">Sort by date</option><option value="status">Sort by status</option></select>';
+        html += '<input id="filter-text" placeholder="Search interviewer or posting title"></div>';
+        
+        html += '<div class="iv-list">';
+        if (results.length === 0) {
+          html += '<p class="none">No interviews found.</p>';
+        } else {
+          results.forEach(function(iv) {
+            var id = iv.interviewId;
+            var start = self.getStartDate(iv);
+            var tz = iv.timezone || "-";
+            var title = self.postingDisplay(iv);
+            var interviewers = self.interviewerDisplay(iv);
+            
+            html += '<div class="iv-card"><div class="iv-top"><div>';
+            html += '<div class="iv-title">' + self.escapeHtml(title) + '</div>';
+            html += '<div class="iv-date">' + self.escapeHtml(start.toLocaleString()) + ' (' + self.escapeHtml(tz) + ')</div>';
+            html += '<div class="iv-interviewer">Interviewer(s): ' + self.escapeHtml(interviewers) + '</div>';
+            html += '</div><button class="toggle-btn" data-id="' + self.escapeHtml(id) + '">';
+            html += (self.expandedId === id ? "Hide" : "Details") + '</button></div>';
+            
+            if (self.expandedId === id) {
+              html += '<div class="iv-details">';
+              html += '<p><strong>Status:</strong> ' + self.escapeHtml(iv.status || "-") + '</p>';
+              html += '<p><strong>Role:</strong> ' + self.escapeHtml(iv.role || "-") + '</p>';
+              html += '<p><strong>Posting:</strong> ' + self.escapeHtml(self.postingDisplay(iv)) + '</p>';
+              html += '<p><strong>Location:</strong> ';
+              if (self.isUrl(iv.location)) {
+                html += '<a href="' + self.escapeHtml(iv.location) + '" target="_blank" rel="noopener noreferrer">' + self.escapeHtml(iv.location) + '</a>';
+              } else {
+                html += self.escapeHtml(iv.location || "-");
+              }
+              html += '</p>';
+              html += '<p><strong>Notes:</strong> ' + self.escapeHtml(self.notesDisplay(iv)) + '</p>';
+              html += '<p><strong>Timezone:</strong> ' + self.escapeHtml(iv.timezone || "-") + '</p>';
+              html += '<p><strong>Start:</strong> ' + self.escapeHtml(self.getStartDate(iv).toLocaleString()) + '</p>';
+              html += '<p><strong>End:</strong> ' + self.escapeHtml(iv.endTime ? new Date(iv.endTime).toLocaleString() : "-") + '</p>';
+              html += '</div>';
+            }
+            html += '</div>';
+          });
+        }
+        html += '</div></div>';
 
-  toggleExpand(id) {
-    this.expandedId = this.expandedId === id ? null : id;
-    this.render();
-  }
+        this.container.innerHTML = html;
 
-  render() {
-    let results = this.filterInterviews();
+        var statusEl = this.container.querySelector("#filter-status");
+        statusEl.value = this.statusFilter;
+        statusEl.onchange = function(e) { self.setFilter("statusFilter", e.target.value); };
 
-    if (this.statusFilter === "upcoming" && this.maxItems) {
-        results = results.slice(0, this.maxItems);
+        var rangeEl = this.container.querySelector("#filter-range");
+        if (rangeEl) {
+          rangeEl.value = String(this.rangeDays);
+          rangeEl.onchange = function(e) {
+            self.rangeDays = Number(e.target.value);
+            self.render();
+          };
+        }
+
+        var postingEl = this.container.querySelector("#filter-posting");
+        postingEl.value = this.postingFilter;
+        postingEl.onchange = function(e) { self.setFilter("postingFilter", e.target.value); };
+
+        var sortEl = this.container.querySelector("#sort-by");
+        sortEl.value = this.sortBy;
+        sortEl.onchange = function(e) { self.setFilter("sortBy", e.target.value); };
+
+        var textEl = this.container.querySelector("#filter-text");
+        textEl.value = this.textSearch;
+        textEl.oninput = function(e) { self.setFilter("textSearch", e.target.value); };
+
+        var toggleBtns = this.container.querySelectorAll(".toggle-btn");
+        toggleBtns.forEach(function(btn) {
+          btn.onclick = function() { self.toggleExpand(btn.dataset.id); };
+        });
+      }
+
+      escapeHtml(s) {
+        var str = String(s !== null && s !== undefined ? s : "");
+        str = str.replace(/&/g, "&amp;");
+        str = str.replace(/</g, "&lt;");
+        str = str.replace(/>/g, "&gt;");
+        str = str.replace(/"/g, "&quot;");
+        str = str.replace(/'/g, "&#039;");
+        return str;
+      }
     }
 
-    // Build posting list for dropdown (based on postingDisplay)
-    const postings = [...new Set(this.interviews.map(iv => this.postingDisplay(iv)))]
-      .filter(p => p && p !== "—")
-      .sort();
+    var sampleInterviews = [
+      {
+        interviewId: "1",
+        postingTitle: "Senior Software Engineer",
+        startTime: new Date(Date.now() + 2 * 86400000).toISOString(),
+        endTime: new Date(Date.now() + 2 * 86400000 + 3600000).toISOString(),
+        status: "scheduled",
+        role: "Backend Engineer",
+        location: "https://zoom.us/j/123456789",
+        timezone: "PST",
+        interviewers: [{name: "John Doe"}, {name: "Jane Smith"}],
+        metadata: {notes: "Technical round - focus on system design"}
+      },
+      {
+        interviewId: "2",
+        postingTitle: "Product Manager",
+        startTime: new Date(Date.now() - 5 * 86400000).toISOString(),
+        endTime: new Date(Date.now() - 5 * 86400000 + 3600000).toISOString(),
+        status: "completed",
+        role: "Product Manager",
+        location: "Conference Room A",
+        timezone: "EST",
+        interviewers: [{name: "Alice Johnson"}],
+        metadata: {notes: "Behavioral interview completed"}
+      }
+    ];
 
-    this.container.innerHTML = `
-      <div class="interviews-box">
-        <h2 class="title">Interviews</h2>
-
-        <div class="filters">
-          <select id="filter-status">
-            <option value="upcoming">Upcoming</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="all">All</option>
-          </select>
-
-          ${this.statusFilter === "upcoming" ? `
-            <select id="filter-range">
-            <option value="7">Next 7 days</option>
-            <option value="14">Next 14 days</option>
-            </select>
-          ` : ""}
-
-          <select id="filter-posting">
-            <option value="">All Postings</option>
-            ${postings.map(p => `<option value="${this.escapeHtml(p)}">${this.escapeHtml(p)}</option>`).join("")}
-          </select>
-
-          <select id="sort-by">
-            <option value="date">Sort by date</option>
-            <option value="status">Sort by status</option>
-          </select>
-
-          <input id="filter-text" placeholder="Search interviewer or posting title">
-        </div>
-
-        <div class="iv-list">
-          ${
-            results.length === 0
-              ? `<p class="none">No interviews found.</p>`
-              : results.map(iv => {
-                  const id = iv.interviewId;               // API field
-                  const start = this.getStartDate(iv);
-                  const tz = iv.timezone || "—";
-                  const title = this.postingDisplay(iv);   // postingTitle preferred
-                  const interviewers = this.interviewerDisplay(iv);
-
-                  return `
-                    <div class="iv-card">
-                      <div class="iv-top">
-                        <div>
-                          <div class="iv-title">${this.escapeHtml(title)}</div>
-                          <div class="iv-date">${this.escapeHtml(start.toLocaleString())} (${this.escapeHtml(tz)})</div>
-                          <div class="iv-interviewer">Interviewer(s): ${this.escapeHtml(interviewers)}</div>
-                        </div>
-                        <button class="toggle-btn" data-id="${this.escapeHtml(id)}">
-                          ${this.expandedId === id ? "Hide" : "Details"}
-                        </button>
-                      </div>
-
-                      ${
-                        this.expandedId === id
-                          ? `
-                            <div class="iv-details">
-                              <p><strong>Status:</strong> ${this.escapeHtml(iv.status || "—")}</p>
-                              <p><strong>Role:</strong> ${this.escapeHtml(iv.role || "—")}</p>
-                              <p><strong>Posting:</strong> ${this.escapeHtml(this.postingDisplay(iv))}</p>
-                              <p><strong>Location:</strong> ${
-                                this.isUrl(iv.location)
-                                    ? `<a href="${this.escapeHtml(iv.location)}"
-                                        target="_blank"
-                                        rel="noopener noreferrer">
-                                        ${this.escapeHtml(iv.location)}
-                                    </a>`
-                                    : this.escapeHtml(iv.location || "—")
-                              }</p>
-                              <p><strong>Notes:</strong> ${this.escapeHtml(this.notesDisplay(iv))}</p>
-                              <p><strong>Timezone:</strong> ${this.escapeHtml(iv.timezone || "—")}</p>
-                              <p><strong>Start:</strong> ${this.escapeHtml(this.getStartDate(iv).toLocaleString())}</p>
-                              <p><strong>End:</strong> ${this.escapeHtml(iv.endTime ? new Date(iv.endTime).toLocaleString() : "—")}</p>
-
-                            </div>
-                          `
-                          : ""
-                      }
-                    </div>
-                  `;
-                }).join("")
-          }
-        </div>
-      </div>
-    `;
-
-    // Bind filter events
-    this.container.querySelector("#filter-status").value = this.statusFilter;
-    this.container.querySelector("#filter-status").onchange = e =>
-      this.setFilter("statusFilter", e.target.value);
-
-    // Bind range selector (only exists for upcoming)
-    const rangeEl = this.container.querySelector("#filter-range");
-    if (rangeEl) {
-      rangeEl.value = String(this.rangeDays);
-      rangeEl.onchange = e => {
-        this.rangeDays = Number(e.target.value);
-        this.render();
-      };
-    }
-
-    this.container.querySelector("#filter-posting").value = this.postingFilter;
-    this.container.querySelector("#filter-posting").onchange = e =>
-      this.setFilter("postingFilter", e.target.value);
-
-    this.container.querySelector("#sort-by").value = this.sortBy;
-    this.container.querySelector("#sort-by").onchange = e =>
-      this.setFilter("sortBy", e.target.value);
-
-    this.container.querySelector("#filter-text").value = this.textSearch;
-    this.container.querySelector("#filter-text").oninput = e =>
-      this.setFilter("textSearch", e.target.value);
-
-    // Bind toggle events
-    this.container.querySelectorAll(".toggle-btn").forEach(btn => {
-      btn.onclick = () => this.toggleExpand(btn.dataset.id);
+    new InterviewsPane(document.getElementById('app'), {
+      interviews: sampleInterviews,
+      defaultRangeDays: 14,
+      maxItems: 7
     });
-  }
-
-  // Very small XSS guard since we’re interpolating strings into HTML
-  escapeHtml(s) {
-    return String(s ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-}
-</script>
+  </script>
+</body>
+</html>

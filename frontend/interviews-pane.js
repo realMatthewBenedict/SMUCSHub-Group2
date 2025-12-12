@@ -16,6 +16,11 @@ class InterviewsPane {
     this.textSearch = "";
 
     this.expandedId = null;
+    // FR6 state
+    this.lastUpdatedAt = options.lastUpdatedAt || null;  // Date or null
+    this.loadError = options.loadError || null;          // string or null
+    this.onRetry = options.onRetry || null;              // () => void
+    this.staleAfterMinutes = options.staleAfterMinutes ?? 10;
 
     this.render();
   }
@@ -103,6 +108,35 @@ class InterviewsPane {
     this.render();
   }
 
+  renderNotice() {
+    if (this.loadError) {
+      return `
+        <div class="iv-notice iv-notice-error">
+          <strong>Interviews currently unavailable.</strong>
+          <span class="iv-notice-msg">${this.escapeHtml(this.loadError)}</span>
+          ${this.onRetry ? `<button class="iv-retry" type="button">Retry</button>` : ""}
+        </div>
+      `;
+    }
+
+    if (this.lastUpdatedAt instanceof Date) {
+      const ageMs = Date.now() - this.lastUpdatedAt.getTime();
+      const staleMs = this.staleAfterMinutes * 60 * 1000;
+      if (ageMs > staleMs) {
+        const mins = Math.floor(ageMs / 60000);
+        return `
+          <div class="iv-notice iv-notice-warn">
+            <strong>Interview data may be stale.</strong>
+            <span class="iv-notice-msg">Last updated ${mins} min ago.</span>
+            ${this.onRetry ? `<button class="iv-retry" type="button">Refresh</button>` : ""}
+          </div>
+        `;
+      }
+    }
+
+    return "";
+  }
+
   render() {
     let results = this.filterInterviews();
 
@@ -117,11 +151,11 @@ class InterviewsPane {
 
     this.container.innerHTML = `
       <div class="interviews-box">
+        ${this.renderNotice()}
         <div class="header-row">
             <h2 class="title">Interviews</h2>
-            <span class="role-pill">Role: ...</span>
+            <span class="role-pill">Role: ${this.escapeHtml(this.hostRole)}</span>
         </div>
-
 
         <div class="filters">
           <select id="filter-status">
@@ -230,6 +264,9 @@ class InterviewsPane {
     this.container.querySelectorAll(".toggle-btn").forEach(btn => {
       btn.onclick = () => this.toggleExpand(btn.dataset.id);
     });
+    const retryBtn = this.container.querySelector(".iv-retry");
+    if (retryBtn && this.onRetry) retryBtn.onclick = () => this.onRetry();
+
   }
 
   // Very small XSS guard since we’re interpolating strings into HTML

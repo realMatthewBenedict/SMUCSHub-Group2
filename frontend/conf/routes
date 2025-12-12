@@ -159,6 +159,7 @@ GET         /user/myFollowers                                                   
 GET         /user/myFollowees                                                                controllers.UserController.myFollowees(page: Integer ?= 1, sortCriteria: String ?= "id", isCallerMySpacePage : Boolean ?= false)
 
 GET         /user/mySpace                                                                    controllers.UserController.mySpacePage()
+GET         /user/interviews                                                                 controllers.UserController.interviewsSummaryPage()
 
 GET         /users/:hashcode                                                                 controllers.UserController.activateUser(hashcode: String)
 

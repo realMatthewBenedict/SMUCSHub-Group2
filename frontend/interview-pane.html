@@ -41,6 +41,10 @@ class InterviewsPane {
     return iv?.metadata?.notes || "None";
   }
 
+  isUrl(s) {
+    return /^https?:\/\//i.test(String(s || ""));
+  }
+
   // Upcoming semantics:
   // - status must be scheduled
   // - startTime within [now, now + defaultRangeDays]
@@ -144,6 +148,7 @@ class InterviewsPane {
               : results.map(iv => {
                   const id = iv.interviewId;               // API field
                   const start = this.getStartDate(iv);
+                  const tz = iv.timezone || "—";
                   const title = this.postingDisplay(iv);   // postingTitle preferred
                   const interviewers = this.interviewerDisplay(iv);
 
@@ -152,7 +157,7 @@ class InterviewsPane {
                       <div class="iv-top">
                         <div>
                           <div class="iv-title">${this.escapeHtml(title)}</div>
-                          <div class="iv-date">${this.escapeHtml(start.toLocaleString())}</div>
+                          <div class="iv-date">${this.escapeHtml(start.toLocaleString())} (${this.escapeHtml(tz)})</div>
                           <div class="iv-interviewer">Interviewer(s): ${this.escapeHtml(interviewers)}</div>
                         </div>
                         <button class="toggle-btn" data-id="${this.escapeHtml(id)}">
@@ -167,8 +172,20 @@ class InterviewsPane {
                               <p><strong>Status:</strong> ${this.escapeHtml(iv.status || "—")}</p>
                               <p><strong>Role:</strong> ${this.escapeHtml(iv.role || "—")}</p>
                               <p><strong>Posting:</strong> ${this.escapeHtml(this.postingDisplay(iv))}</p>
-                              <p><strong>Location:</strong> ${this.escapeHtml(iv.location || "—")}</p>
+                              <p><strong>Location:</strong> ${
+                                this.isUrl(iv.location)
+                                    ? `<a href="${this.escapeHtml(iv.location)}"
+                                        target="_blank"
+                                        rel="noopener noreferrer">
+                                        ${this.escapeHtml(iv.location)}
+                                    </a>`
+                                    : this.escapeHtml(iv.location || "—")
+                              }</p>
                               <p><strong>Notes:</strong> ${this.escapeHtml(this.notesDisplay(iv))}</p>
+                              <p><strong>Timezone:</strong> ${this.escapeHtml(iv.timezone || "—")}</p>
+                              <p><strong>Start:</strong> ${this.escapeHtml(this.getStartDate(iv).toLocaleString())}</p>
+                              <p><strong>End:</strong> ${this.escapeHtml(iv.endTime ? new Date(iv.endTime).toLocaleString() : "—")}</p>
+
                             </div>
                           `
                           : ""

@@ -1,0 +1,142 @@
+<script>
+class InterviewsPane {
+    constructor(container, options) {
+        this.container = container;
+        this.interviews = options.interviews || [];
+        this.defaultRangeDays = options.defaultRangeDays || 14;
+
+        this.statusFilter = "upcoming";
+        this.postingFilter = "";
+        this.textSearch = "";
+
+        this.expandedId = null;
+
+        this.render();
+    }
+
+    filterInterviews() {
+        const now = new Date();
+        const cutoff = new Date(now.getTime() + this.defaultRangeDays * 86400000);
+
+        return this.interviews
+            .filter(iv => {
+                const d = new Date(iv.datetime);
+
+                // Status filter
+                if (this.statusFilter !== "all" && iv.status !== this.statusFilter)
+                    return false;
+
+                // Date window for upcoming
+                if (this.statusFilter === "upcoming" && !(d >= now && d <= cutoff))
+                    return false;
+
+                // Posting filter
+                if (this.postingFilter && iv.posting !== this.postingFilter)
+                    return false;
+
+                // Text search
+                const q = this.textSearch.toLowerCase();
+                if (q) {
+                    const hay = (iv.jobTitle + " " + iv.interviewer).toLowerCase();
+                    if (!hay.includes(q)) return false;
+                }
+
+                return true;
+            })
+            .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+    }
+
+    setFilter(type, value) {
+        this[type] = value;
+        this.render();
+    }
+
+    toggleExpand(id) {
+        this.expandedId = this.expandedId === id ? null : id;
+        this.render();
+    }
+
+    render() {
+        const results = this.filterInterviews();
+
+        this.container.innerHTML = `
+            <div class="interviews-box">
+                <h2 class="title">Interviews</h2>
+
+                <div class="filters">
+                    <select id="filter-status">
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="all">All</option>
+                    </select>
+
+                    <select id="filter-posting">
+                        <option value="">All Postings</option>
+                        ${[...new Set(this.interviews.map(i => i.posting))]
+                            .map(p => `<option value="${p}">${p}</option>`)
+                            .join("")}
+                    </select>
+
+                    <input id="filter-text" placeholder="Search interviewer or job title">
+                </div>
+
+                <div class="iv-list">
+                    ${
+                        results.length === 0
+                            ? `<p class="none">No interviews found.</p>`
+                            : results
+                                  .map(
+                                      iv => `
+                        <div class="iv-card">
+                            <div class="iv-top">
+                                <div>
+                                    <div class="iv-title">${iv.jobTitle}</div>
+                                    <div class="iv-date">${new Date(iv.datetime).toLocaleString()}</div>
+                                    <div class="iv-interviewer">Interviewer: ${iv.interviewer}</div>
+                                </div>
+                                <button class="toggle-btn" data-id="${iv.id}">
+                                    ${this.expandedId === iv.id ? "Hide" : "Details"}
+                                </button>
+                            </div>
+
+                            ${
+                                this.expandedId === iv.id
+                                    ? `
+                                <div class="iv-details">
+                                    <p><strong>Status:</strong> ${iv.status}</p>
+                                    <p><strong>Posting:</strong> ${iv.posting}</p>
+                                    <p><strong>Location:</strong> ${iv.location}</p>
+                                    <p><strong>Notes:</strong> ${iv.notes || "None"}</p>
+                                </div>`
+                                    : ""
+                            }
+                        </div>
+                    `
+                                  )
+                                  .join("")
+                    }
+                </div>
+            </div>
+        `;
+
+        // Bind filter events
+        this.container.querySelector("#filter-status").value = this.statusFilter;
+        this.container.querySelector("#filter-status").onchange = e =>
+            this.setFilter("statusFilter", e.target.value);
+
+        this.container.querySelector("#filter-posting").value = this.postingFilter;
+        this.container.querySelector("#filter-posting").onchange = e =>
+            this.setFilter("postingFilter", e.target.value);
+
+        this.container.querySelector("#filter-text").value = this.textSearch;
+        this.container.querySelector("#filter-text").oninput = e =>
+            this.setFilter("textSearch", e.target.value);
+
+        // Bind toggle events
+        this.container.querySelectorAll(".toggle-btn").forEach(btn => {
+            btn.onclick = () => this.toggleExpand(btn.dataset.id);
+        });
+    }
+}
+</script>

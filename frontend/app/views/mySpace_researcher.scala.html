@@ -2,11 +2,26 @@
     <link href='@routes.Assets.at("stylesheets/quill.snow.css")'
     rel="stylesheet" />
     <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/quill.js")'></script>
+    <script src='@routes.Assets.at("Interviews/interviews-pane.js")'></script>
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            const root = document.getElementById("myspace-interviews-root-researcher");
+            if (!root) return;
+
+            // For FR3: prove role-based render works (professor/researcher)
+            new InterviewsPane(root, {
+            interviews: [],
+            role: "professor",
+            defaultRangeDays: 14
+            });
+        });
+    </script>
 }
 @main("My Space (Researcher)", scripts) {
     <div class="container">
         <div class="row">
             <div class="card-panel">
+                <div id="myspace-interviews-root-researcher"></div>
                 <div class="row center">
                     <h4 class="center form-signin-heading" align="center">
                         My Space

@@ -456,11 +456,47 @@
       }
     ];
 
-    new InterviewsPane(document.getElementById('app'), {
-      interviews: sampleInterviews,
-      defaultRangeDays: 14,
-      maxItems: 100
-    });
+    async function loadMockInterviews() {
+        // Try local-only deterministic mock endpoint (FR5)
+        const url = "/mock/api/v1/interviews?limit=100&offset=0";
+        const res = await fetch(url, { credentials: "include" });
+        if (!res.ok) throw new Error("Mock API returned " + res.status);
+        const data = await res.json();
+
+        // Our server response shape is likely { items, limit, offset, total }
+        return Array.isArray(data.items) ? data.items : (Array.isArray(data) ? data : []);
+      }
+
+      (async function initDemo() {
+        const root = document.getElementById("app");
+
+        // Render immediately (so the page isn’t blank if fetch is slow/fails)
+        const pane = new InterviewsPane(root, {
+          interviews: [],
+          defaultRangeDays: 14,
+          maxItems: 100
+        });
+
+        try {
+          const items = await loadMockInterviews();
+          pane.interviews = items;
+          pane.render();
+        } catch (e) {
+          // Demo fallback (still shows something if mock endpoint isn’t running)
+          console.warn("Falling back to sampleInterviews:", e);
+          pane.interviews = sampleInterviews;
+          pane.render();
+
+          // Optional: also show a banner above the app
+          const msg = document.createElement("div");
+          msg.style.marginBottom = "12px";
+          msg.style.padding = "10px";
+          msg.style.border = "1px solid #d33";
+          msg.style.borderRadius = "6px";
+          msg.textContent = "Mock API unavailable, using sample data for demo.";
+          root.parentNode.insertBefore(msg, root);
+        }
+      })();
   </script>
 </body>
 </html>

@@ -1,0 +1,5 @@
+.iv-notice { padding: 10px; border-radius: 8px; margin: 10px 0; }
+.iv-notice-error { border: 1px solid #d33; }
+.iv-notice-warn  { border: 1px solid #cc0; }
+.iv-notice-msg { margin-left: 8px; opacity: 0.85; }
+.iv-retry { margin-left: 12px; }

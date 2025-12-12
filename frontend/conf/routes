@@ -125,6 +125,12 @@ POST        /challenge/searchPOST/:pageNum                                      
 ########################################################## Challenges #####################################################################
 
 
+########################################################## API routes #####################################################################
+GET         /api/v1/interviews           controllers.InterviewController.listInterviews(userId: String,role: String, limit: Integer ?= 100, offset: Integer ?= 0)
+
+GET         /mock/api/v1/interviews                                                           controllers.MockInterviewController.listInterviews(userId: String ?= "", role: String ?= "", limit: Integer ?= 100, offset: Integer ?= 0)
+
+########################################################## API routes #####################################################################
 
 ########################################################## Users #####################################################################
 GET         /user/userRegisterPage                                                           controllers.UserController.userRegisterPage()

@@ -21,16 +21,14 @@ public class MockInterviewController extends Controller {
 
     public Result listInterviews(String userId, String role, Integer limit, Integer offset) {
         // Local only: block in prod/test
-        if (!env.isDev()) {
-            return notFound();
-        }
+        if (!(env.isDev() || env.isTest())) return notFound();
 
         int lim = (limit == null) ? 100 : Math.min(limit, 1000);
         int off = (offset == null) ? 0 : Math.max(offset, 0);
 
-        // Load deterministic fixture from conf/mock/interviews.json
-        try (InputStream is = env.resourceAsStream("mock/interviews.json")) {
-            if (is == null) return internalServerError("Missing mock/interviews.json");
+        // Load deterministic fixture from conf/interviews.json
+        try (InputStream is = env.resourceAsStream("conf/interviews.json")) {
+            if (is == null) return internalServerError("Missing conf/interviews.json");
 
             JsonNode root = Json.parse(is);
 

@@ -14,6 +14,7 @@ class InterviewsPane {
     this.postingFilter = "";        // postingTitle
     this.textSearch = "";
 
+    this.sortBy = "date";
     this.expandedId = null;
 
     this.render();
@@ -43,6 +44,15 @@ class InterviewsPane {
 
   isUrl(s) {
     return /^https?:\/\//i.test(String(s || ""));
+  }
+
+  statusRank(status) {
+      switch (status) {
+          case "scheduled": return 0;
+          case "completed": return 1;
+          case "cancelled": return 2;
+          default: return 3;
+      }
   }
 
   // Upcoming semantics:
@@ -89,8 +99,20 @@ class InterviewsPane {
 
         return true;
       })
-      .sort((a, b) => this.getStartDate(a) - this.getStartDate(b));
-  }
+      .sort((a, b) => {
+        const da = this.getStartDate(a);
+        const db = this.getStartDate(b);
+
+        if (this.sortBy === "status") {
+            const ra = this.statusRank(a.status);
+            const rb = this.statusRank(b.status);
+            if (ra !== rb) return ra - rb;
+            return da - db;
+        }
+
+        return da - db;
+      });
+}
 
   setFilter(type, value) {
     this[type] = value;
@@ -136,6 +158,11 @@ class InterviewsPane {
           <select id="filter-posting">
             <option value="">All Postings</option>
             ${postings.map(p => `<option value="${this.escapeHtml(p)}">${this.escapeHtml(p)}</option>`).join("")}
+          </select>
+
+          <select id="sort-by">
+            <option value="date">Sort by date</option>
+            <option value="status">Sort by status</option>
           </select>
 
           <input id="filter-text" placeholder="Search interviewer or posting title">
@@ -216,6 +243,10 @@ class InterviewsPane {
     this.container.querySelector("#filter-posting").value = this.postingFilter;
     this.container.querySelector("#filter-posting").onchange = e =>
       this.setFilter("postingFilter", e.target.value);
+
+    this.container.querySelector("#sort-by").value = this.sortBy;
+    this.container.querySelector("#sort-by").onchange = e =>
+      this.setFilter("sortBy", e.target.value);
 
     this.container.querySelector("#filter-text").value = this.textSearch;
     this.container.querySelector("#filter-text").oninput = e =>

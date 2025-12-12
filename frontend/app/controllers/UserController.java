@@ -507,6 +507,27 @@ public class UserController extends Controller {
     }
     /************************************************** My Space ******************************************************/
 
+    /************************************************** Interviews Summary Page ******************************************************/
+    @With(OperationLoggingAction.class)
+    public Result interviewsSummaryPage() {
+        checkLoginStatus();
+
+        String userId = session("id");          // set during login
+        String userTypes = session("userTypes"); // used on MySpace
+        if (userId == null || userTypes == null) {
+            return unauthorized("Not logged in");
+        }
+
+        // Map userTypes -> "student" | "professor"
+        // From the controller comment: 4=student, 1=researcher/professor, 2=sponsor
+        String role = "student";
+        if ("1".equals(userTypes) || "2".equals(userTypes)) role = "professor";
+        if ("4".equals(userTypes)) role = "student";
+
+        return ok(interviewsSummary.render(userId, role));
+    }
+    /************************************************** Interviews Summary Page ******************************************************/
+
     /************************************************** User Login Checking *******************************************/
 
     /**

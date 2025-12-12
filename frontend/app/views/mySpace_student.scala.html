@@ -2,20 +2,40 @@
     <link href='@routes.Assets.at("stylesheets/quill.snow.css")'
     rel="stylesheet" />
     <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/quill.js")'></script>
+    <link rel="stylesheet" href='@routes.Assets.at("stylesheets/interviews.css")'>
     <script src='@routes.Assets.at("frontend/interviews-pane.js")'></script>
     <script>
-        window.addEventListener("DOMContentLoaded", () => {
+        window.addEventListener("DOMContentLoaded", async () => {
             const root = document.getElementById("myspace-interviews-root-student");
             if (!root) return;
 
-            // For FR3: prove role-based render works (student)
-            new InterviewsPane(root, {
+            const pane = new InterviewsPane(root, {
             interviews: [],
             role: "student",
-            defaultRangeDays: 14
+            defaultRangeDays: 14,
+            staleAfterMinutes: 10,
+            onRetry: () => window.location.reload() // simplest
             });
+
+            try {
+            // Use same API as summary page; userId is from session on server side,
+            // but if your API requires query params, you can inject them later.
+            const res = await fetch(`/api/v1/interviews?role=student&limit=100&offset=0`, { credentials: "include" });
+            if (!res.ok) throw new Error("Failed to load interviews: " + res.status);
+            const data = await res.json();
+
+            pane.interviews = data.items || [];
+            pane.loadError = null;
+            pane.lastUpdatedAt = new Date();
+            pane.render();
+            } catch (e) {
+            pane.interviews = [];
+            pane.loadError = String(e.message || e);
+            pane.render();
+            }
         });
     </script>
+
 }
 @main("My Space (Student)", scripts) {
     <div class="container">

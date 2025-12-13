@@ -162,7 +162,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to prepare to edit an TA job.
      *
-     * @patam tajobId: TA job id
+     * @param tajobId: TA job id
      * @return
      */
     @With(OperationLoggingAction.class)
@@ -186,7 +186,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to submit the edit in the TA job edit page.
      *
-     * @patam tajobId TA job id
+     * @param tajobId TA job id
      * @return
      */
     public Result tajobEditPOST(Long tajobId) {
@@ -231,8 +231,8 @@ public class TAJobController extends Controller {
     /**
      * This method intends to prepare data for all TA jobs.
      *
-     * @patam pageNum
-     * @patam sortCriteria: sortCriteria on some fields. Could be empty if not specified at the first time.
+     * @param pageNum
+     * @param sortCriteria: sortCriteria on some fields. Could be empty if not specified at the first time.
      * @return: data for jobList.scala.html
      */
     @With(OperationLoggingAction.class)
@@ -261,8 +261,8 @@ public class TAJobController extends Controller {
     /**
      * This method intends to prepare data for all TA jobs.
      *
-     * @patam pageNum
-     * @patam sortCriteria: sortCriteria on some fields. Could be empty if not specified at the first time.
+     * @param pageNum
+     * @param sortCriteria: sortCriteria on some fields. Could be empty if not specified at the first time.
      * @return: data for jobList.scala.html
      */
     @With(OperationLoggingAction.class)
@@ -308,7 +308,7 @@ public class TAJobController extends Controller {
     /**
      * Ths method intends to return details of an TA job. If an TA job is not found, return to the all job page (page 1?).
      *
-     * @patam tajobId: TA job id
+     * @param tajobId: TA job id
      * @return: TAJob, a list of TA jobs to jobDetail.scala.html
      */
     @With(OperationLoggingAction.class)
@@ -383,7 +383,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to prepare to edit a job.
      *
-     * @patam tajobId: job id
+     * @param tajobId: job id
      * @return
      */
     @With(OperationLoggingAction.class)
@@ -412,7 +412,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to save TA job as a PDF file.
      *
-     * @patam tajobId: job id
+     * @param tajobId: job id
      * @return
      */
     public Result saveTAJobPdf(Long tajobApplicationId) {
@@ -667,7 +667,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to submit the edit in the job edit page.
      *
-     * @patam tajobId job id
+     * @param tajobId job id
      * @return
      */
     public Result tajobApplyPOST(Long tajobId) {
@@ -748,7 +748,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to prepare data for rending TA job research result page
      *
-     * @patam pageNum
+     * @param pageNum
      * @return: data prepared for tajobList.scala.html (same as show all job list page)
      */
     public Result searchPOST(Integer pageNum, String sortCriteria) {
@@ -818,7 +818,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to inactivate the TA job by calling the backend
      *
-     * @patam tajobId
+     * @param tajobId
      * @return redirect to the job list page
      */
     public Result deleteTAJob(long tajobId) {
@@ -887,7 +887,7 @@ public class TAJobController extends Controller {
 //    }
 
     /**
-     * @patam id
+     * @param id
      * @return
      */
     public Result isTAJobExist(String id) {

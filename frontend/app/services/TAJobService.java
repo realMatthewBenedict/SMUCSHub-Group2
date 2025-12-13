@@ -44,7 +44,7 @@ public class TAJobService {
     /**
      * This method intends to get TAJob by id by calling backend APIs.
      *
-     * @patam tajobId
+     * @param tajobId
      * @return TAJob
      */
     public TAJob getTAJobById(Long tajobId) {
@@ -69,8 +69,8 @@ public class TAJobService {
     /**
      * This method intends to save a pdf to TA job.
      *
-     * @patam body
-     * @patam tajobId: TA job id
+     * @param body
+     * @param tajobId: TA job id
      * @throws Exception
      */
     public void savePDFToTAJob(Http.MultipartFormData body, Long tajobId) throws Exception {
@@ -96,12 +96,12 @@ public class TAJobService {
      * Note that for performance considetation, the backend only passes back the TA jobs for the needed page stored in
      * the TAJobListJsonNode, together with the offset/count/total/sortCriteria information.
      *
-     * @patam tajobListJsonNode
-     * @patam pageLimit
-     * @patam searchBody
-     * @patam listType          : "all"; "search" (dtaw this page from list function or from search function)
-     * @patam username
-     * @patam userId
+     * @param tajobListJsonNode
+     * @param pageLimit
+     * @param searchBody
+     * @param listType          : "all"; "search" (dtaw this page from list function or from search function)
+     * @param username
+     * @param userId
      * @return render challenge list page; If exception happened then render the homepage
      */
     public Result renderTAJobListPage(JsonNode tajobListJsonNode,
@@ -157,7 +157,7 @@ public class TAJobService {
     /**
      * This method intends to prepare a json TA job from TA Job form.
      *
-     * @patam tajobForm: TA job registtation form
+     * @param tajobForm: TA job registtation form
      * @return
      * @throws Exception
      */

@@ -99,7 +99,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to update TA job information except picture.
      *
-     * @patam tajobId
+     * @param tajobId
      * @return
      */
     public Result updateTAJob(Long tajobId) {
@@ -182,7 +182,7 @@ public class TAJobController extends Controller {
     /**
      * Delete job image by job id.
      *
-     * @patam tajobId
+     * @param tajobId
      * @return
      */
     public Result deleteTAJobImage(Long tajobId) {
@@ -208,7 +208,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to delete job pdf by job id
      *
-     * @patam tajobId
+     * @param tajobId
      * @return
      */
     public Result deleteTAJobPDF(Long tajobId) {
@@ -230,9 +230,9 @@ public class TAJobController extends Controller {
     /**
      * Gets a list of all the TA jobs based on optional offset and limit and sort
      *
-     * @patam pageLimit    shows the number of rows we want to receive
-     * @patam pageNum      shows the page number
-     * @patam sortCriteria shows based on what column we want to sort the data
+     * @param pageLimit    shows the number of rows we want to receive
+     * @param pageNum      shows the page number
+     * @param sortCriteria shows based on what column we want to sort the data
      * @return a list of TA jobs
      * // TODO: Clean Common utitlity class for getSortCriteria(), not always register_time_stamp
      */
@@ -274,7 +274,7 @@ public class TAJobController extends Controller {
     /**
      * Get an TA job detail by the TA job id
      *
-     * @patam tajobId TA job Id
+     * @param tajobId TA job Id
      * @return ok if the TA job is found; badRequest if the TA job is not found
      */
     public Result getTAJobById(Long tajobId) {
@@ -320,7 +320,7 @@ public class TAJobController extends Controller {
     /**
      * This method returns all TA jobs from TA job info table given the publisher id (the publisher of the TA job)
      *
-     * @patam userId the publisher Id
+     * @param userId the publisher Id
      * @return all TA jobs.
      */
     public Result getTAJobsByPublisher(Long userId) {
@@ -374,7 +374,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to return the publisher of a TA job.
      *
-     * @patam tajobId TA job id
+     * @param tajobId TA job id
      * @return json of the publisher of the job posting
      */
     public Result getTAJobPublisher(Long tajobId) {
@@ -394,11 +394,11 @@ public class TAJobController extends Controller {
     /**
      * Check if the TA job is search result
      *
-     * @patam tajob            TA Job being checked
-     * @patam title
-     * @patam goals
-     * @patam location
-     * @patam shortDescription
+     * @param tajob            TA Job being checked
+     * @param title
+     * @param goals
+     * @param location
+     * @param shortDescription
      * @return if the TA job is search result.
      */
     private boolean isMatchedTAJob(TAJob tajob, String title, String goals, String location, String shortDescription) {
@@ -440,10 +440,10 @@ public class TAJobController extends Controller {
     /**
      * Filter the TA jobs based on title, goal, location, short description
      *
-     * @patam title            TA Job list being filtered
-     * @patam goals
-     * @patam location
-     * @patam shortDescription
+     * @param title            TA Job list being filtered
+     * @param goals
+     * @param location
+     * @param shortDescription
      * @return the list of filtered TA jobs.
      */
     private List<TAJob> matchedTAJobList(List<TAJob> tajobList, String title, String goals, String location,
@@ -533,7 +533,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to set TA job image by job id
      *
-     * @patam tajobId
+     * @param tajobId
      * @return TODO: change?
      */
     public Result setImage(Long tajobId) {
@@ -557,7 +557,7 @@ public class TAJobController extends Controller {
     /**
      * This method intends to set TA job pdf by TA job id
      *
-     * @patam tajobId
+     * @param tajobId
      * @return
      */
     public Result setPDF(Long tajobId) {
@@ -584,8 +584,8 @@ public class TAJobController extends Controller {
      * to remove the images having id more than the project's description image count (This is because we can remove the
      * deleted description images from S3)
      *
-     * @patam projectId                project ID
-     * @patam countImagesInDescription number of images in the project's description
+     * @param projectId                project ID
+     * @param countImagesInDescription number of images in the project's description
      */
     private void removeDeletedImagesInDescriptionFromS3(long projectId, int countImagesInDescription) {
         try {
@@ -617,7 +617,7 @@ public class TAJobController extends Controller {
     /**
      * This method receives an TA job id and deletes the TA job by inactivating it (set is_active field to be false).
      *
-     * @patam tajobId given TA job Id
+     * @param tajobId given TA job Id
      * @return ok or not found
      */
     public Result deleteTAJob(Long tajobId) {
@@ -671,7 +671,7 @@ public class TAJobController extends Controller {
 //    /**
 //     * Convert a JSON string to pretty print version
 //     *
-//     * @patam jsonString
+//     * @param jsonString
 //     * @return
 //     */
 //    public String toPrettyFormat(String jsonString) {

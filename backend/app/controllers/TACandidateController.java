@@ -74,9 +74,9 @@ public class TACandidateController extends Controller {
     /**
      * Gets a list of all the TA jobs based on optional offset and limit and sort
      *
-     * @patam pageLimit    shows the number of rows we want to receive
-     * @patam pageNum      shows the page number
-     * @patam sortCriteria shows based on what column we want to sort the data
+     * @param pageLimit    shows the number of rows we want to receive
+     * @param pageNum      shows the page number
+     * @param sortCriteria shows based on what column we want to sort the data
      * @return a list of TA jobs
      * // TODO: Clean Common utitlity class for getSortCriteria(), not always register_time_stamp
      */

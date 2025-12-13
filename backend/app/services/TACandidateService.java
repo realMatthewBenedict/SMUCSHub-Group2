@@ -20,10 +20,10 @@ public class TACandidateService {
     /**
      * This method intends to return a list of TA jobs based on optional offset and pageLimit and sort criteria
      *
-     * @patam tajobs   all TA jobs
-     * @patam offset       shows the start index of the jobs rows we want to receive
-     * @patam pageLimit    shows the number of rows we want to receive
-     * @patam sortCriteria sort order
+     * @param tajobs   all TA jobs
+     * @param offset       shows the start index of the jobs rows we want to receive
+     * @param pageLimit    shows the number of rows we want to receive
+     * @param sortCriteria sort order
      * @return the list of jobs.
      */
     public RESTResponse paginateResults(List<TACandidate> taCandidates, Optional<Integer> offset, Optional<Integer> pageLimit,

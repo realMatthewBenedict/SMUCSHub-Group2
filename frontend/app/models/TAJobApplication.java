@@ -199,7 +199,7 @@ public class TAJobApplication {
     /**
      * Deserializes the json to a Author.
      *
-     * @patam node the node to convert from.
+     * @param node the node to convert from.
      * @return the dataset object.
      * TODO: How to make sure all fields are checked???
      */
@@ -226,9 +226,9 @@ public class TAJobApplication {
     /**
      * This utility method intends to return a list of users from JsonNode based on starting and ending index.
      *
-     * @patam usersJson
-     * @patam startIndex
-     * @patam endIndex
+     * @param usersJson
+     * @param startIndex
+     * @param endIndex
      * @return: a list of users
      */
     public static List<Author> deserializeJsonToUserList(JsonNode usersJson, int startIndex, int endIndex)

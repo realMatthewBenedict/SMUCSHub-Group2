@@ -423,7 +423,7 @@ public class ChallengeController extends Controller {
     /**
      * This method returns all TA jobs from TA job info table given the publisher id (the publisher of the TA job)
      *
-     * @patam userId the publisher Id
+     * @param userId the publisher Id
      * @return all TA jobs.
      */
     public Result getChallengesByPublisher(Long userId) {

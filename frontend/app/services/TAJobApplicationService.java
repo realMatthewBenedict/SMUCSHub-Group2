@@ -50,7 +50,7 @@ public class TAJobApplicationService {
     /**
      * This method intends to get Job by id by calling backend APIs.
      *
-     * @patam tajobId
+     * @param tajobId
      * @return Job
      */
     public TAJob getTAJobById(Long tajobId) {
@@ -141,8 +141,8 @@ public class TAJobApplicationService {
     /**
      * This method intends to save a picture to job.
      *
-     * @patam body
-     * @patam jobId: job id
+     * @param body
+     * @param jobId: job id
      * @throws Exception
      */
 //    public void savePictureToJob(Http.MultipartFormData body, Long jobId) throws Exception {
@@ -181,9 +181,9 @@ public class TAJobApplicationService {
     /**
      * This method intends to add a list of team members to a job, from job registtation form.
      *
-     * @patam JobForm: job registtation form
-     * @patam body
-     * @patam jobId:   job id
+     * @param JobForm: job registtation form
+     * @param body
+     * @param jobId:   job id
      */
 //    public void addTeamMembersToJob(Form<Job> JobForm, Http.MultipartFormData body, Long jobId) {
 //        ObjectMapper mapper = new ObjectMapper();
@@ -219,7 +219,7 @@ public class TAJobApplicationService {
     /**
      * This method intends to add a list of team members to a job, from job registtation form.
      *
-     * @patam JobForm: job registtation form
+     * @param JobForm: job registtation form
      */
 //    public void deleteTeamMembersToJob(Form<Job> JobForm) {
 //        try {
@@ -248,13 +248,13 @@ public class TAJobApplicationService {
      * Note that for performance considetation, the backend only passes back the jobs for the needed page stored in
      * the JobListJsonNode, together with the offset/count/total/sortCriteria information.
      *
-     * @patam JobListJsonNode
-     * @patam currentJobZone
-     * @patam pageLimit
-     * @patam searchBody
-     * @patam listType            : "all"; "search" (dtaw this page from list function or from search function)
-     * @patam username
-     * @patam userId
+     * @param JobListJsonNode
+     * @param currentJobZone
+     * @param pageLimit
+     * @param searchBody
+     * @param listType            : "all"; "search" (dtaw this page from list function or from search function)
+     * @param username
+     * @param userId
      * @return render job list page; If exception happened then render the homepage
      */
 //    public Result renderJobListPage(JsonNode JobListJsonNode,
@@ -311,7 +311,7 @@ public class TAJobApplicationService {
     /**
      * This method intends to prepare a json object from Job form.
      *
-     * @patam TAJobApplicationForm: job registtation form
+     * @param TAJobApplicationForm: job registtation form
      * @return
      * @throws Exception
      */

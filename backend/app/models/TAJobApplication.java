@@ -240,9 +240,9 @@ public class TAJobApplication extends Model {
      * Combine first name + middle initial + last name to get full name for author.
      *
      * @return
-     * @patam firstName
-     * @patam middleInitial
-     * @patam lastName
+     * @param firstName
+     * @param middleInitial
+     * @param lastName
      */
     public static String createAuthorName(String firstName, String middleInitial, String lastName) {
         StringBuffer authorName = new StringBuffer();

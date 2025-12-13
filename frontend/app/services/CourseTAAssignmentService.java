@@ -46,12 +46,12 @@ public class CourseTAAssignmentService {
      * Note that for performance considetation, the backend only passes back the TA jobs for the needed page stored in
      * the TAJobListJsonNode, together with the offset/count/total/sortCriteria information.
      *
-     * @patam tajobListJsonNode
-     * @patam pageLimit
-     * @patam searchBody
-     * @patam listType          : "all"; "search" (dtaw this page from list function or from search function)
-     * @patam username
-     * @patam userId
+     * @param tajobListJsonNode
+     * @param pageLimit
+     * @param searchBody
+     * @param listType          : "all"; "search" (dtaw this page from list function or from search function)
+     * @param username
+     * @param userId
      * @return render challenge list page; If exception happened then render the homepage
      */
     public Result renderCourseTAAssignmentListPage(JsonNode assignmentListJsonNode,
@@ -152,7 +152,7 @@ public class CourseTAAssignmentService {
     /**
      * This method intends to get CourseTA Assignment by id by calling backend APIs.
      *
-     * @patam coursetaassignment
+     * @param coursetaassignment
      * @return CourseTAAssignment
      */
     public CourseTAAssignment getTAAssignmentById(Long assignmentId) {

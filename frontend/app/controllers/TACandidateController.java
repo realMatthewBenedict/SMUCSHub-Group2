@@ -143,8 +143,8 @@ public class TACandidateController extends Controller {
         /**
          * This method intends to prepare data for all TA candidates.
          *
-         * @patam pageNum
-         * @patam sortCriteria: sortCriteria on some fields. Could be empty if not specified at the first time.
+         * @param pageNum
+         * @param sortCriteria: sortCriteria on some fields. Could be empty if not specified at the first time.
          * @return: data for tacandidateList.scala.html
          */
         @With(OperationLoggingAction.class)
@@ -175,7 +175,7 @@ public class TACandidateController extends Controller {
     /**
      * Ths method intends to return details of an TA candidate. If an TA candidate is not found, return to the all candidates page (page 1?).
      *
-     * @patam tacandidateId: TA candidate id
+     * @param tacandidateId: TA candidate id
      * @return: TACcandidate, a list of TA candidates to candidateDetail.scala.html
      */
         @With(OperationLoggingAction.class)

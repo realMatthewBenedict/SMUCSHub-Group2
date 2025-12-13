@@ -63,7 +63,7 @@ public class TACandidate {
     /**
      * Deserializes the json to an TA job.
      *
-     * @patam json the json to convert from.
+     * @param json the json to convert from.
      * @return the dataset object.
      * TODO: How to make sure all fields are checked???
      */
@@ -79,9 +79,9 @@ public class TACandidate {
     /**
      * This utility method intends to return a list of TA candidates from JsonNode based on starting and ending index.
      *
-     * @patam tacandidatesJson
-     * @patam startIndex
-     * @patam endIndex
+     * @param tacandidatesJson
+     * @param startIndex
+     * @param endIndex
      * @return: a list of TA jobs
      */
     public static List<TACandidate> deserializeJsonToTACandidateList(JsonNode tacandidatesJson, int startIndex, int endIndex)

@@ -70,8 +70,16 @@
                   <i class="material-icons tiny" style="vertical-align: middle;">schedule</i>
                   @startTime (@timezone)
                   &nbsp;&nbsp;
+                  <span>
                   <i class="material-icons tiny" style="vertical-align: middle;">place</i>
-                  @location
+                  @defining(location.trim) { loc =>
+                      @if(loc.startsWith("http://") || loc.startsWith("https://")) {
+                      <a href="@loc" target="_blank" rel="noopener noreferrer">@loc</a>
+                      } else {
+                      @loc
+                      }
+                  }
+                  </span>
                 </div>
                 <div class="grey-text text-darken-1" style="margin-top: 4px;">
                   <i class="material-icons tiny" style="vertical-align: middle;">group</i>

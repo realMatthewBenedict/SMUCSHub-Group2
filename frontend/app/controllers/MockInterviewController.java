@@ -1,14 +1,14 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.Environment;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class MockInterviewController extends Controller {
 
@@ -19,39 +19,25 @@ public class MockInterviewController extends Controller {
         this.env = env;
     }
 
-    public Result listInterviews(String userId, String role, Integer limit, Integer offset) {
-        // Local only: block in prod/test
-        if (!(env.isDev() || env.isTest())) return notFound();
+    public Result list(Long userId, String role, Integer limit) {
+        try (InputStream is = env.resourceAsStream("public/data/mock/interviews.json")) {
+            if (is == null) {
+                return internalServerError("mock interviews file not found: public/data/mock/interviews.json");
+            }
 
-        int lim = (limit == null) ? 100 : Math.min(limit, 1000);
-        int off = (offset == null) ? 0 : Math.max(offset, 0);
+            // Java 8 read
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] chunk = new byte[4096];
+            int n;
+            while ((n = is.read(chunk)) != -1) {
+                buffer.write(chunk, 0, n);
+            }
 
-        // Load deterministic fixture from conf/interviews.json
-        try (InputStream is = env.resourceAsStream("conf/interviews.json")) {
-            if (is == null) return internalServerError("Missing conf/interviews.json");
+            String raw = new String(buffer.toByteArray(), StandardCharsets.UTF_8);
 
-            JsonNode root = Json.parse(is);
-
-            // Expect root has "items"
-            JsonNode items = root.get("items");
-            if (items == null || !items.isArray()) return internalServerError("Mock JSON missing items[]");
-
-            // (Optional) filter by userId/role
-            // For now: deterministic, no filtering, just paginate the array.
-
-            int total = items.size();
-            int from = Math.min(off, total);
-            int to = Math.min(off + lim, total);
-
-            ObjectNode out = Json.newObject();
-            out.put("limit", lim);
-            out.put("offset", off);
-            out.put("total", total);
-            out.set("items", items.deepCopy().subList(from, to));
-
-            return ok(out);
+            return ok(Json.parse(raw)).as("application/json");
         } catch (Exception e) {
-            return internalServerError("Mock API error: " + e.getMessage());
+            return internalServerError("Failed to load mock interviews: " + e.getMessage());
         }
     }
 }

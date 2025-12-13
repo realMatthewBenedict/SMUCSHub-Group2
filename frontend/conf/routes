@@ -124,13 +124,14 @@ POST        /challenge/searchPOST/:pageNum                                      
 
 ########################################################## Challenges #####################################################################
 
+########################################################## Interviews #####################################################################
 
-########################################################## API routes #####################################################################
-GET         /api/v1/interviews           controllers.InterviewController.listInterviews(userId: String,role: String, limit: Integer ?= 100, offset: Integer ?= 0)
+GET          /mock/interviews                                                                 controllers.MockInterviewController.list(userId: Long ?= 1, role: String ?= "student", limit: Int ?= 1000)
 
-GET         /mock/api/v1/interviews                                                           controllers.MockInterviewController.listInterviews(userId: String ?= "", role: String ?= "", limit: Integer ?= 100, offset: Integer ?= 0)
 
-########################################################## API routes #####################################################################
+GET          /user/interviews                                                                 controllers.UserController.interviewsPage()
+
+########################################################## Interviews #####################################################################
 
 ########################################################## Users #####################################################################
 GET         /user/userRegisterPage                                                           controllers.UserController.userRegisterPage()
@@ -165,7 +166,6 @@ GET         /user/myFollowers                                                   
 GET         /user/myFollowees                                                                controllers.UserController.myFollowees(page: Integer ?= 1, sortCriteria: String ?= "id", isCallerMySpacePage : Boolean ?= false)
 
 GET         /user/mySpace                                                                    controllers.UserController.mySpacePage()
-GET         /user/interviews                                                                 controllers.UserController.interviewsSummaryPage()
 
 GET         /users/:hashcode                                                                 controllers.UserController.activateUser(hashcode: String)
 

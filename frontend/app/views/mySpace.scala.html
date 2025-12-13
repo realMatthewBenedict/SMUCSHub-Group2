@@ -88,5 +88,14 @@
                 </div>
             </div>
         </div>
+        @views.html.interviewsPane(
+            role = if(userTypes == "4") "student" else "professor",
+            interviews = Seq(
+                ("RA Interview - Data Science Lab", "scheduled", "2025-12-15 2:00 PM", "America/Chicago", "Zoom", "Prof. Smith, TA Johnson"),
+                ("Industry Interview - Local Org", "completed", "2025-12-05 10:00 AM", "America/Chicago", "Hybrid", "Jane Doe")
+            ),
+            bannerMsg = Some("Interviews currently unavailable. Please try again later.")
+        )
+
     </div>
 }

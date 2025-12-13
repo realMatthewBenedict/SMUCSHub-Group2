@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2025-01-01T00:00:00Z",
+  "items": [
+    {
+      "id": 1,
+      "role": "student",
+      "userId": 101,
+      "postingTitle": "RA Interview - Data Science Lab",
+      "status": "scheduled",
+      "startTime": "2025-12-15T14:00:00-06:00",
+      "timezone": "America/Chicago",
+      "location": "Zoom",
+      "interviewers": "Prof. Smith, TA Johnson"
+    },
+    {
+      "id": 2,
+      "role": "student",
+      "userId": 101,
+      "postingTitle": "Industry Interview - Local Org",
+      "status": "completed",
+      "startTime": "2025-12-05T10:00:00-06:00",
+      "timezone": "America/Chicago",
+      "location": "Hybrid",
+      "interviewers": "Jane Doe"
+    },
+    {
+      "id": 3,
+      "role": "professor",
+      "userId": 201,
+      "postingTitle": "RA Candidate Interview",
+      "status": "scheduled",
+      "startTime": "2025-12-16T11:00:00-06:00",
+      "timezone": "America/Chicago",
+      "location": "In-person",
+      "interviewers": "You"
+    },
+    {
+      "id": 4,
+      "role": "professor",
+      "userId": 201,
+      "postingTitle": "RA Candidate Follow-up",
+      "status": "cancelled",
+      "startTime": "2025-12-18T09:00:00-06:00",
+      "timezone": "America/Chicago",
+      "location": "Zoom",
+      "interviewers": "You"
+    }
+  ]
+}

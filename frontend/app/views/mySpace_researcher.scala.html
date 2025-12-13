@@ -2,44 +2,20 @@
     <link href='@routes.Assets.at("stylesheets/quill.snow.css")'
     rel="stylesheet" />
     <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/quill.js")'></script>
-    <link rel="stylesheet" href='@routes.Assets.at("stylesheets/interviews.css")'>
-    <script src='@routes.Assets.at("frontend/interviews-pane.js")'></script>
-    <script>
-        window.addEventListener("DOMContentLoaded", async () => {
-            const root = document.getElementById("myspace-interviews-root-researcher");
-            if (!root) return;
-
-            const pane = new InterviewsPane(root, {
-            interviews: [],
-            role: "professor",
-            defaultRangeDays: 14,
-            staleAfterMinutes: 10,
-            onRetry: () => window.location.reload()
-            });
-
-            try {
-            const res = await fetch(`/api/v1/interviews?role=professor&limit=100&offset=0`, { credentials: "include" });
-            if (!res.ok) throw new Error("Failed to load interviews: " + res.status);
-            const data = await res.json();
-
-            pane.interviews = data.items || [];
-            pane.loadError = null;
-            pane.lastUpdatedAt = new Date();
-            pane.render();
-            } catch (e) {
-            pane.interviews = [];
-            pane.loadError = String(e.message || e);
-            pane.render();
-            }
-        });
-    </script>
-
 }
 @main("My Space (Researcher)", scripts) {
     <div class="container">
         <div class="row">
             <div class="card-panel">
-                <div id="myspace-interviews-root-researcher"></div>
+                @interviewsPane(
+                    role = "professor",
+                    interviews = Seq(
+                        ("RA Candidate Interview", "scheduled", "2025-12-16 11:00 AM", "America/Chicago", "In-person", "You")
+                    ),
+                    bannerMsg = Some("Interviews currently unavailable. Please try again later.")
+                )
+
+
                 <div class="row center">
                     <h4 class="center form-signin-heading" align="center">
                         My Space

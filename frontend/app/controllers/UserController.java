@@ -8,6 +8,7 @@ import com.typesafe.config.Config;
 import models.*;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.lang3.StringUtils;
+import play.Environment;
 import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
@@ -15,6 +16,9 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
+import play.mvc.*;
+import play.mvc.Http.*;
+import play.mvc.Http;
 import services.ProjectService;
 import services.UserService;
 import utils.Constants;
@@ -25,6 +29,11 @@ import views.html.*;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +43,15 @@ import static controllers.Application.isPrivateProjectZone;
 import static utils.Constants.CALLER_IS_MY_SPACE_PAGE;
 import static utils.Constants.CALLER_IS_NOT_MY_SPACE_PAGE;
 
+import scala.Tuple6;
+import scala.collection.Seq;
+import scala.collection.JavaConverters;
+import scala.Option;
+
 public class UserController extends Controller {
+
+
+    /******************************* Constructor **********************************************************************/
 
     @Inject
     Config config;
@@ -42,21 +59,25 @@ public class UserController extends Controller {
     private final ProjectService projectService;
     private final UserService userService;
 
+    private final Environment env;
+
     private Form<User> userForm;
     private FormFactory myFactory;
 
-
-    /******************************* Constructor **********************************************************************/
     @Inject
     public UserController(FormFactory factory,
                           ProjectService projectService,
-                          UserService userService) {
+                          UserService userService,
+                          Environment env) {
         userForm = factory.form(User.class);
         myFactory = factory;
 
         this.projectService = projectService;
         this.userService = userService;
+
+        this.env = env;
     }
+    
 
     private List<Organization> fetchOrganizationsList() {
         JsonNode organizationsJsonNode = RESTfulCalls.getAPI(RESTfulCalls.getBackendAPIUrl(config, Constants.ORGANIZATION_LIST));
@@ -108,6 +129,75 @@ public class UserController extends Controller {
             info = "Your new password has been reset. Please check it in: " + email + ". You can use it and login now.";
         }
         return ok(passwordReset.render(info));
+    }
+
+    public Result interviewsPage() {
+
+        // 1) Determine role (your logic)
+        String userTypes = session("userTypes");
+        if (userTypes == null) userTypes = "4";
+        String role = "4".equals(userTypes) ? "student" : "professor";
+
+
+        // Default values
+        String banner = null;
+        List<Tuple6<String,String,String,String,String,String>> rows = new ArrayList<>();
+
+        try (InputStream is = env.resourceAsStream("public/data/mock/interviews.json")) {
+
+            if (is == null) {
+                banner = "Interviews currently unavailable. Please try again later.";
+            } else {
+                // Java 8 read
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                byte[] chunk = new byte[4096];
+                int n;
+                while ((n = is.read(chunk)) != -1) buffer.write(chunk, 0, n);
+
+                String raw = new String(buffer.toByteArray(), StandardCharsets.UTF_8);
+                JsonNode root = Json.parse(raw);
+
+                // 2) Read generatedAt
+                Instant generatedAt = Instant.parse(root.path("generatedAt").asText("1970-01-01T00:00:00Z"));
+
+                // 3) If older than 24 hours → stale banner
+                boolean isStale = Duration.between(generatedAt, Instant.now()).toHours() > 24;
+                if (isStale) {
+                    banner = "Interview data may be stale (last updated: " + generatedAt.toString() + ").";
+                }
+
+                // 4) Render items normally
+                JsonNode items = root.path("items");
+                if (items.isArray()) {
+                    for (JsonNode nItem : items) {
+                        if (!role.equals(nItem.path("role").asText())) continue;
+
+                        rows.add(scala.Tuple6.apply(
+                            nItem.path("postingTitle").asText(""),
+                            nItem.path("status").asText(""),
+                            nItem.path("startTime").asText(""),
+                            nItem.path("timezone").asText(""),
+                            nItem.path("location").asText(""),
+                            nItem.path("interviewers").asText("")
+                        ));
+
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            banner = "Interviews currently unavailable due to an error.";
+        }
+
+        // Convert Java List -> Scala Seq
+        Seq<Tuple6<String,String,String,String,String,String>> interviewsSeq =
+                JavaConverters.asScalaBuffer(rows).toSeq();
+
+        // Banner to Option[String]
+        scala.Option<String> bannerOpt =
+                (banner == null) ? scala.Option.empty() : scala.Option.apply(banner);
+
+        return ok(views.html.interviews.render(role, interviewsSeq, bannerOpt));
     }
 
     /**
@@ -506,27 +596,6 @@ public class UserController extends Controller {
          */
     }
     /************************************************** My Space ******************************************************/
-
-    /************************************************** Interviews Summary Page ******************************************************/
-    @With(OperationLoggingAction.class)
-    public Result interviewsSummaryPage() {
-        checkLoginStatus();
-
-        String userId = session("id");          // set during login
-        String userTypes = session("userTypes"); // used on MySpace
-        if (userId == null || userTypes == null) {
-            return unauthorized("Not logged in");
-        }
-
-        // Map userTypes -> "student" | "professor"
-        // From the controller comment: 4=student, 1=researcher/professor, 2=sponsor
-        String role = "student";
-        if ("1".equals(userTypes) || "2".equals(userTypes)) role = "professor";
-        if ("4".equals(userTypes)) role = "student";
-
-        return ok(interviewsSummary.render(userId, role));
-    }
-    /************************************************** Interviews Summary Page ******************************************************/
 
     /************************************************** User Login Checking *******************************************/
 

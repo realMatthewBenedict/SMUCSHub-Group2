@@ -1,0 +1,192 @@
+@* frontend/app/views/interviewsPane.scala.html *@
+@(role: String,
+  interviews: Seq[(String, String, String, String, String, String)] = Seq.empty,
+  bannerMsg: Option[String] = None)
+
+<div class="card-panel" id="interviews-pane" style="margin-top: 20px;">
+  <div class="row" style="margin-bottom: 0;">
+    <div class="col s12">
+      @defining(role == "student") { isStudent =>
+        <h5 style="margin-top: 0;">
+            @if(isStudent) {
+                Your Interviews
+            } else {
+                Interviews With Candidates
+            }
+        </h5>
+       }
+
+       <div class="row" style="margin-bottom: 10px;">
+        <div class="col s12 m4">
+            <select id="iv-status" class="browser-default">
+                <option value="">All statuses</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="rescheduled">Rescheduled</option>
+            </select>
+        </div>
+
+        <div class="col s12 m4">
+            <select id="iv-sort" class="browser-default">
+                <option value="dateAsc">Date (earliest first)</option>
+                <option value="dateDesc">Date (latest first)</option>
+                <option value="statusAsc">Status (A→Z)</option>
+                <option value="statusDesc">Status (Z→A)</option>
+                <option value="postingAsc">Posting (A→Z)</option>
+                <option value="postingDesc">Posting (Z→A)</option>
+            </select>
+        </div>
+
+        <div class="col s12 m4">
+            <input id="iv-q" type="text" placeholder="Search posting or interviewers…" />
+        </div>
+       </div>
+
+      @bannerMsg.map { msg =>
+        <div class="card-panel yellow lighten-4" style="border-left: 5px solid #fbc02d;">
+          <i class="material-icons left">warning</i>
+          <span>@msg</span>
+          <a class="right" href="#" onclick="window.location.reload(); return false;">Retry</a>
+        </div>
+      }
+
+      @if(interviews.isEmpty && bannerMsg.isEmpty) {
+        <p class="grey-text">No interviews to show yet.</p>
+      } else {
+        <ul id="iv-list" class="collection" style="margin-top: 10px;">
+          @for((iv, idx) <- interviews.zipWithIndex) {
+            @defining(iv) { case (postingTitle, status, startTime, timezone, location, interviewers) =>
+              <li class="collection-item"
+                data-status="@status"
+                data-posting="@postingTitle"
+                data-start="@startTime"
+                data-interviewers="@interviewers">
+                <div style="font-weight: 600;">
+                  @postingTitle
+                  <span class="new badge" data-badge-caption="">@status</span>
+                </div>
+                <div class="grey-text text-darken-1" style="margin-top: 4px;">
+                  <i class="material-icons tiny" style="vertical-align: middle;">schedule</i>
+                  @startTime (@timezone)
+                  &nbsp;&nbsp;
+                  <i class="material-icons tiny" style="vertical-align: middle;">place</i>
+                  @location
+                </div>
+                <div class="grey-text text-darken-1" style="margin-top: 4px;">
+                  <i class="material-icons tiny" style="vertical-align: middle;">group</i>
+                  @interviewers
+                  <p class="grey-text" style="margin-top:-10px;">Viewing as: @role</p>
+                </div>
+              </li>
+            }
+          }
+        </ul>
+
+        <div style="margin-top: 10px;">
+          <a href="@routes.UserController.interviewsPage()">View all interviews</a>
+        </div>
+      }
+    </div>
+  </div>
+  
+  <script>
+    (function () {
+    const pane = document.getElementById("interviews-pane");
+    if (!pane) return;
+
+    const list = pane.querySelector("#iv-list");
+    if (!list) return;
+
+    const statusSel = pane.querySelector("#iv-status");
+    const sortSel   = pane.querySelector("#iv-sort");
+    const qInput    = pane.querySelector("#iv-q");
+
+    // Snapshot original <li> elements once; we will filter/sort these.
+    const items = Array.from(list.querySelectorAll("li.collection-item"));
+
+    // Utility: normalize strings for comparison/search
+    const norm = (s) => (s || "").toString().trim().toLowerCase();
+
+    // Utility: parse the start time into a sortable number.
+    // Works best if data-start is ISO-ish, but falls back to string compare.
+    const parseStart = (li) => {
+        const raw = li.dataset.start || "";
+        // Try Date.parse; if NaN, fallback to raw string
+        const t = Date.parse(raw);
+        return Number.isNaN(t) ? raw : t;
+    };
+
+    const compare = (a, b, mode) => {
+        if (mode === "dateAsc") {
+        const ta = parseStart(a), tb = parseStart(b);
+        return (ta > tb) ? 1 : (ta < tb) ? -1 : 0;
+        }
+        if (mode === "dateDesc") {
+        const ta = parseStart(a), tb = parseStart(b);
+        return (ta > tb) ? -1 : (ta < tb) ? 1 : 0;
+        }
+
+        const statusA  = norm(a.dataset.status);
+        const statusB  = norm(b.dataset.status);
+        const postingA = norm(a.dataset.posting);
+        const postingB = norm(b.dataset.posting);
+
+        if (mode === "statusAsc")  return statusA.localeCompare(statusB) || postingA.localeCompare(postingB);
+        if (mode === "statusDesc") return statusB.localeCompare(statusA) || postingA.localeCompare(postingB);
+
+        if (mode === "postingAsc")  return postingA.localeCompare(postingB) || statusA.localeCompare(statusB);
+        if (mode === "postingDesc") return postingB.localeCompare(postingA) || statusA.localeCompare(statusB);
+
+        // Default stable-ish
+        return 0;
+    };
+
+    const apply = () => {
+        const statusFilter = norm(statusSel ? statusSel.value : "");
+        const q = norm(qInput ? qInput.value : "");
+        const sortMode = sortSel ? sortSel.value : "dateAsc";
+
+        // Filter
+        const visible = items.filter(li => {
+        const st = norm(li.dataset.status);
+        const posting = norm(li.dataset.posting);
+        const interviewers = norm(li.dataset.interviewers);
+
+        if (statusFilter && st !== statusFilter) return false;
+
+        if (q) {
+            // Search across posting + interviewers (matches your needs well)
+            const hay = posting + " " + interviewers;
+            if (!hay.includes(q)) return false;
+        }
+        return true;
+        });
+
+        // Sort
+        visible.sort((a, b) => compare(a, b, sortMode));
+
+        // Render: clear and re-append (fast enough for <=1000)
+        list.innerHTML = "";
+        for (const li of visible) list.appendChild(li);
+
+        // Optional: show a friendly empty state if filters remove everything
+        if (visible.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "collection-item grey-text";
+        empty.textContent = "No interviews match your filters.";
+        list.appendChild(empty);
+        }
+    };
+
+    // Wire listeners
+    if (statusSel) statusSel.addEventListener("change", apply);
+    if (sortSel) sortSel.addEventListener("change", apply);
+    if (qInput) qInput.addEventListener("input", apply);
+
+    // Initial apply (ensures default sort is applied)
+    apply();
+    })();
+</script>
+
+</div>

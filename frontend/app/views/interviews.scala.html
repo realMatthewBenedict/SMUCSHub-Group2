@@ -1,0 +1,13 @@
+@(role: String,
+  interviews: Seq[(String, String, String, String, String, String)] = Seq.empty,
+  bannerMsg: Option[String] = None)
+
+@main("Interviews") {
+  <div class="container">
+    @views.html.interviewsPane(
+      role = role,
+      interviews = interviews,
+      bannerMsg = bannerMsg
+    )
+  </div>
+}

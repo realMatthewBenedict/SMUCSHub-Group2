@@ -9,7 +9,7 @@
       "status": "scheduled",
       "startTime": "2025-12-15T14:00:00-06:00",
       "timezone": "America/Chicago",
-      "location": "Zoom",
+      "location": "https://smu.zoom.us/j/1234567890?pwd=abcdef",
       "interviewers": "Prof. Smith, TA Johnson"
     },
     {
@@ -42,8 +42,52 @@
       "status": "cancelled",
       "startTime": "2025-12-18T09:00:00-06:00",
       "timezone": "America/Chicago",
-      "location": "Zoom",
+      "location": "https://smu.zoom.us/j/1234567890?pwd=abcdef",
       "interviewers": "You"
+    },
+    {
+      "id": 5,
+      "role": "student",
+      "userId": 101,
+      "postingTitle": "Software Engineering Internship Interview",
+      "status": "scheduled",
+      "startTime": "2025-12-20T16:30:00-06:00",
+      "timezone": "America/Chicago",
+      "location": "Engineering Building, Room 301",
+      "interviewers": "Alex Johnson"
+    },
+    {
+      "id": 6,
+      "role": "student",
+      "userId": 101,
+      "postingTitle": "Research Assistant Screening",
+      "status": "cancelled",
+      "startTime": "2025-12-12T09:00:00-06:00",
+      "timezone": "America/Chicago",
+      "location": "https://smu.zoom.us/j/1234567890?pwd=abcdef",
+      "interviewers": "Dr. Nguyen"
+    },
+    {
+      "id": 7,
+      "role": "professor",
+      "userId": 201,
+      "postingTitle": "Graduate Applicant Interview",
+      "status": "completed",
+      "startTime": "2025-12-01T13:00:00-06:00",
+      "timezone": "America/Chicago",
+      "location": "Hybrid",
+      "interviewers": "You, Committee Member A"
+    },
+    {
+      "id": 8,
+      "role": "student",
+      "userId": 101,
+      "postingTitle": "Data Analyst Internship Interview",
+      "status": "scheduled",
+      "startTime": "2026-01-10T11:00:00-06:00",
+      "timezone": "America/Chicago",
+      "location": "https://smu.zoom.us/j/1234567890?pwd=abcdef",
+      "interviewers": "Hiring Manager"
     }
   ]
 }

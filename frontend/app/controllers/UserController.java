@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -143,7 +144,7 @@ public class UserController extends Controller {
         String banner = null;
         List<Tuple6<String,String,String,String,String,String>> rows = new ArrayList<>();
 
-        try (InputStream is = env.resourceAsStream("public/data/mock/interviews.json")) {
+        try (InputStream is = new FileInputStream("public/data/mock/interviews.json")) {
 
             if (is == null) {
                 banner = "Interviews currently unavailable. Please try again later.";

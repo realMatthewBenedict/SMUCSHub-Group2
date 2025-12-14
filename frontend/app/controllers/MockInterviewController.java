@@ -8,6 +8,7 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 
 public class MockInterviewController extends Controller {
@@ -20,7 +21,7 @@ public class MockInterviewController extends Controller {
     }
 
     public Result list(Long userId, String role, Integer limit) {
-        try (InputStream is = env.resourceAsStream("public/data/mock/interviews.json")) {
+        try (InputStream is = new FileInputStream("public/data/mock/interviews.json")) {
             if (is == null) {
                 return internalServerError("mock interviews file not found: public/data/mock/interviews.json");
             }

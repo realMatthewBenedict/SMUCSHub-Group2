@@ -1,5 +1,5 @@
 # Use OpenJDK 8 to run Play backend
-FROM openjdk:8-jdk-slim
+FROM openjdk:8u342-jdk-slim
 
 # Set working directory
 WORKDIR /app
